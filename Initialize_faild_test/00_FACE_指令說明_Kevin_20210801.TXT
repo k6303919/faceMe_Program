@@ -1,0 +1,417 @@
+00_FACE_指令說明.TXT
+
+===================================
+■■■原始，FACE_ME程式，(C++程式)
+===================================
+前置工作
+. faceme_prerun.sh
+執行
+./faceme_run.sh 200
+
+===================================
+■■■使用PYTHON
+===================================
+cd PY
+偵測攝像頭
+sudo python3 FaceMePythonSample.py listcameras
+文字操作
+sudo python3 FaceMePythonSample.py recognizevideos -deviceIds 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===================================
+■■■注意事項：
+1-前置使用，必須先執行，否則程式會開不了。
+2-更新DB檔後，必須重開程式，才會更新，才會偵測到新的人臉
+
+
+
+
+===================================
+■■■前置使用，
+若沒有使用，執行時，會發生錯誤
+疑似，USB裝置，沒有執行權限，讀取會錯誤
+/dev/bus/usb/001/XXX(最後一個)
+執行：
+./FaceMeSDKVideoSampleTool recognizeVideo --FDM=DNN --FRM=VH5_M --minface=112 -o gui 200
+錯誤回應：
+uvc_open failed......
+Device opened......
+程式記憶體區段錯誤 (核心已傾印)
+===================================
+cd /dev/bus/usb/001
+ls                  #回應001  002  003  005 ...
+sudo chmod 777 001  #數字會跳號，曾經看到027
+sudo chmod 777 002  #這裡只寫3個，自行添加
+sudo chmod 777 003
+sudo chmod 777 004
+sudo chmod 777 005
+sudo chmod 777 006
+sudo chmod 777 007
+sudo chmod 777 008
+sudo chmod 777 009
+sudo chmod 777 010
+
+
+===================================
+■■■一次新增，多人照片
+===================================
+1-在目錄下，建立【VIBOT】目錄
+/home/ingee/FaceMeSDK/DemoSystem/Program/VIBOT
+
+2-新增單人照片目錄，0911_JOYCE_CH
+在這個目錄下，存照片，例：JOYCE_01.PNG
+/home/ingee/FaceMeSDK/DemoSystem/Program/VIBOT/0911_JOYCE_CH
+
+3-以此類推，把所有人照片放入
+
+4-執行指令
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+./FaceMeSDKVideoSampleTool register VIBOT
+
+5-回應
+[
+        {
+                "file":"JOYCE_001.JPG",
+                "userId":"0911_JOYCE_CH"
+        },
+]
+
+===================================
+■■■查尋，目前有的照片數量
+===================================
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+./FaceMe_Sample_DB --listdb
+
+■回應
+The database now contains 1 people, 13 faces.
+------------------------------------------------------------
+0911_JOYCE_CH(13)
+
+===================================
+■■■一次，新增，單人照片
+註：這裡的照片，建議用偵測鏡頭來拍，
+用手機拍的時候，常會判斷不出來
+===================================
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+./FaceMeSDKVideoSampleTool register VIBOT/0911_JOYCE_CH
+./FaceMeSDKVideoSampleTool register VIBOT/0223_JASON
+./FaceMeSDKVideoSampleTool register VIBOT/0101_YI_LING
+./FaceMeSDKVideoSampleTool register VIBOT/6060_ERIC
+./FaceMeSDKVideoSampleTool register VIBOT/2020_LING
+./FaceMeSDKVideoSampleTool register VIBOT/0817_KEVIN
+
+
+■回應-正確
+[
+        {
+                "file":"JOYCE_001.JPG",
+                "userId":"0911_JOYCE_CH"
+        }
+]
+■回應-錯誤
+File or directory is not found.
+
+===================================
+■■■檢查照片
+===================================
+■目錄：
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+■執行：
+./FaceMe_Sample_QualityCheck --photo VIBOT/0911_JOYCE/111.jpg
+./FaceMe_Sample_QualityCheck --photo VIBOT/0707_JOYCE/0707_JOYCE_001.JPG
+./FaceMe_Sample_QualityCheck --photo VIBOT/0707_JOYCE/0707_JOYCE_002.JPG
+■回應-正確：
+Image Quality Check Result:
+Total Time: 00:00:00.475
+Total Detected Face Count: 1
+------------------------------------------------------------
+Face Index: 0
+Size (IOD > 36 pixel):Quality OK
+Angle (<20 degrees):  Quality OK
+Occlusion:            Quality OK
+Camera Focus:         Quality OK
+Lighting:             Quality OK
+Color:                Quality OK
+------------------------------------------------------------
+------------------------------------------------------------
+Face Detection Model: DNN
+Face Extraction Model: DEFAULT
+Min. Face: 112
+
+■回應-錯誤：
+Image Quality Check Result:
+Total Time: 00:00:00.445
+Total Detected Face Count: 1
+
+------------------------------------------------------------
+Face Index: 0
+Size (IOD > 36 pixel):Quality OK
+Angle (<20 degrees):  NG
+Occlusion:            NG
+Camera Focus:         Quality OK
+Lighting:             Quality OK
+Color:                Quality OK
+------------------------------------------------------------
+------------------------------------------------------------
+Face Detection Model: DNN
+Face Extraction Model: DEFAULT
+Min. Face: 112
+
+===================================
+■■■一次，移除，單人照片
+===================================
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+./FaceMeSDKVideoSampleTool unregister 0911_JOYCE_CH
+./FaceMeSDKVideoSampleTool unregister 0223_JASON
+./FaceMeSDKVideoSampleTool unregister 0101_YI_LING
+■回應-正確
+[
+        "0911_JOYCE_CH"
+]
+■回應-錯誤，註：它就是回應，兩個框框，不是我寫錯
+[
+
+]
+
+===================================
+■■■執行，FACE偵測
+===================================
+目錄：
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+執行：
+./FaceMeSDKVideoSampleTool recognizeVideo --FDM=DNN --FRM=VH5_M --minface=112 -o gui 200
+
+■minface=112辨識距離約1.5~2.0公尺
+■minface= 80辨識距離約2.5~3.0公尺
+■minface= 60辨識距離約3.0~3.5公尺
+
+
+■回應-錯誤，註：請先執行，【前置使用】
+#uvc_open failed......
+#Device opened......
+#程式記憶體區段錯誤 (核心已傾印)
+
+===================================
+■■■DB檔，儲存位址
+===================================
+目錄：
+/home/ingee/.local/share/CyberLink/FaceMeSDK/db
+檔案：
+faceMe.fdb
+注意事項：
+更新DB檔後，必須重開程式，才會更新，才會偵測到新的人臉
+
+
+===================================
+■■■LOGO檔，儲存位址
+===================================
+目錄：
+/home/ingee/FaceMeSDK/DemoSystem/Program/resource/VideoSampleTool
+檔案：
+CyberLink_alpha.png
+
+
+
+
+
+===================================
+■■■10秒偵測，10秒不偵測
+===================================
+JAMES回應
+16:05 G周博_james wu 這個跟license有關, 因為你的SDK是裝VH5_M, 但是這把測試key只有到VH_M
+16:06 G周博_james wu 這個要請Edward開這把key的權限
+
+
+
+
+
+
+
+===================================
+===================================
+===================================
+下面是【程式，組譯，功能】
+
+
+===================================
+■■■程式，組譯，功能，
+===================================
+
+
+===================================
+■■■安裝套件
+Step1. Build libuvc for Jetson platform
+===================================
+git clone https://github.com/libuvc/libuvc
+cd libuvc
+mkdir build
+cd build
+cmake ..
+make && sudo make install
+
+===================================
+■■■編寫程式
+===================================
+cd /home/ingee/FaceMeSDK/SDK/SampleCode/FaceMeSDKVideoSampleTool
+
+===================================
+■■■組譯程式
+===================================
+cd /home/ingee/FaceMeSDK/SDK/SampleCode/FaceMeSDKVideoSampleTool
+cmake .
+make
+
+cmake -DCMAKE_BUILD=Debug .
+cmake -DCMAKE_BUILD_TYPE=Debug .
+
+
+===================================
+■■■組譯程式，再次重組
+===================================
+cd /home/ingee/FaceMeSDK/SDK/SampleCode/FaceMeSDKVideoSampleTool
+make clean
+make
+
+===================================
+■■■執行程式
+===================================
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+./FaceMeSDKVideoSampleTool recognizeVideo --FDM=DNN --FRM=VH5_M --minface=112 -o gui 200
+./FaceMeSDKVideoSampleTool recognizeVideo --FDM=DNN --FRM=VH6_M -o gui 200
+
+
+./FaceMeSDKVideoSampleTool activate iLc52HTcRCCm1Z867ThF9VpYtlpeoyU5UffdoyZ7
+License is activated. License key=iLc52HTcRCCm1Z867ThF9VpYtlpeoyU5UffdoyZ7
+
+./FaceMeSDKVideoSampleTool deactivate iLc52HTcRCCm1Z867ThF9VpYtlpeoyU5UffdoyZ7
+
+./FaceMeSDKVideoSampleTool deactivate CZpRvtvNrFvjkE78K2Ak2WD31Vsus1wg4W0ytnFS
+CZpRvtvNrFvjkE78K2Ak2WD31Vsus1wg4W0ytnFS
+
+./FaceMeSDKVideoSampleTool activate CZpRvtvNrFvjkE78K2Ak2WD31Vsus1wg4W0ytnFS
+./FaceMeSDKVideoSampleTool activate DdWlmNoeKqtFu1E258WRZQNV1R4FP2TQFLgpzbOn
+./FaceMeSDKVideoSampleTool activate nmrhtoV9EUMB51z0FbSPZegDDqcI8g6rYv686dZG
+./FaceMeSDKVideoSampleTool activate qqtjVESjOPPSQhNnMZCPAmHyt6VWV3Tyteu1b6Mz
+
+
+更新LICENSE
+./FaceMeSDKVideoSampleTool renew iLc52HTcRCCm1Z867ThF9VpYtlpeoyU5UffdoyZ7
+./FaceMeSDKVideoSampleTool renew DdWlmNoeKqtFu1E258WRZQNV1R4FP2TQFLgpzbOn
+
+
+./FaceMeSDKVideoSampleTool activate bgLje3PGZguAApIIZFr1OWn91y9yA6IAJHZThbmQ
+[ERROR] Error occured. License key is incorrect.
+
+https://iter01.com/543835.html
+通過以下命令可以檢視板子的執行情況，如下所示：
+
+# 安裝 jetson-stats
+sudo -H pip install jetson-stats
+# 檢視狀態
+sudo jtop
+
+
+===================================
+■■■執行程式
+===================================
+目錄
+/home/ingee/FaceMeSDK/SDK/Other Languages/Python/Bin
+
+更新PIP
+python3.6 -m pip install --upgrade pip
+
+安裝PYTHON
+python3.6 -m pip install FaceMe-5.8.0-py36-none-manylinux2014_x86_64.whl
+
+
+===================================
+■■■RTSP串流
+===================================
+https://www.videolan.org/vlc/index.zh_TW.html
+rtsp://192.168.0.109:8554/stream
+http://192.168.0.209/stream/mjpeg
+
+
+
+===================================
+■■■開啟鏡頭
+===================================
+cd /home/ingee/FaceMeSDK/DemoSystem/Program
+./FaceMeSDKVideoSampleTool listCameras
+
+
+===================================
+■■■開啟鏡頭
+===================================
+https://yanwei-liu.medium.com/89e1ed63757c
+https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%20Linux%20Driver%20Package%20Development%20Guide/accelerated_gstreamer.html#
+
+gst-launch-1.0 nvarguscamerasrc sensor_mode=0 ! 'video/x-raw(memory:NVMM),width=3820, height=2464, framerate=21/1, format=NV12' ! nvvidconv flip-method=0 ! 'video/x-raw,width=960, height=616' ! nvvidconv ! nvegltransform ! nveglglessink -e
+
+gst-launch-1.0 nvarguscamerasrc ! 'video/x-raw(memory:NVMM),width=3820, height=2464, framerate=21/1, format=NV12' ! nvvidconv flip-method=0 ! 'video/x-raw,width=960, height=616' ! nvvidconv ! nvegltransform ! nveglglessink -e
+
+
+
+
+https://blog.intemotech.com/ubuntu-%E5%BA%95%E4%B8%8B%E5%AE%89%E8%A3%9D-cmake/
+mkdir ~/temp
+cd ~/temp
+wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0.tar.gz
+tar -xzvf cmake-3.20.0.tar.gz
+cd cmake-3.20.0/
+./bootstrap
+make -j$(nproc)
+sudo make install
+
+https://zhuanlan.zhihu.com/p/93480024
+sudo mv cmake-3.20.0 /opt/cmake-3.20.0
+sudo ln -sf /opt/cmake-3.20.0/bin/*  /usr/bin/
+cmake --version
+
+
+
+
+
+
+
+remote_build.ps1
+
+pscp  -pw 1234 FaceMeVideoStreamHandler.cpp ingee@192.168.0.103:/home/ingee/FaceMeSDK/SDK/SampleCode/FaceMeSDKVideoSampleTool/
+pscp  -pw 1234 FaceMeVideoStreamHandler.h ingee@192.168.0.103:/home/ingee/FaceMeSDK/SDK/SampleCode/FaceMeSDKVideoSampleTool/
+pscp  -pw 1234 FaceMeBaseEngine.h ingee@192.168.0.103:/home/ingee/FaceMeSDK/SDK/SampleCode/FaceMeSDKVideoSampleTool/
+pscp -r  -pw 1234 ../utils/vt360 ingee@192.168.0.103:/home/ingee/FaceMeSDK/SDK/SampleCode/utils/
+
+所以是3個檔案，1個目錄
+檔案：
+1-FaceMeVideoStreamHandler.cpp
+2-FaceMeVideoStreamHandler.h
+3-FaceMeBaseEngine.h
+
+目錄：
+vt360
+____api.hpp
+____json11.cpp
+____json11.hpp
+____VT360.cpp
+____VT360.hpp
+
+FaceMeSDKVideoSampleTool.cpp
+CMakeLists.txt
+
+/var/www/html/vt360/storage/logs
+
+

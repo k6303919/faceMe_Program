@@ -1,0 +1,18 @@
+主要有三個動作
+【1】 啟動 rtsp server
+【2】 啟動辨識程式
+【3】 執行 gst 串接辨識程式的 mjpeg service 並發送至 rtsp server
+./gst-launch-1.0 souphttpsrc location="http://localhost/stream/mjpeg" do-timestamp=true is_live=true ! multipartdemux ! jpegdec ! queue ! video/x-raw ! x264enc ! mpegtsmux ! rtspclientsink location=rtsp://localhost:8554/stream
+
+--------------------------------------------------------------------
+
+註1
+1. 2. 先後順序都可以，不相關
+3. 一定要在 1. 2. 開啟後再執行，若否串流會因為 無 來源抓取/目的發送 而中斷
+
+註2
+gstreamer1.0 已內建於 jetson image 內，不須另外安裝
+補上安裝須知的 rtsp 插件及 ugly (含編碼器) 插件即可
+
+註3
+gstreamer 串流可以試著再調整參數進行優化，詳閱 gstreamer 官方說明
